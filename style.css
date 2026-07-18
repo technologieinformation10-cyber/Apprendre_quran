@@ -1,0 +1,566 @@
+/* =========================================================
+   مساعد حفظ القرآن — التصميم
+   الاتجاه البصري: صفحة مصحف/مخطوطة — ورق عاجي، أخضر المصحف
+   التقليدي، لمسات ذهبية نحاسية، ونجمة ثمانية كعنصر توقيع
+   مستوحى من الزخرفة الهندسية الإسلامية.
+   ========================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;900&display=swap");
+
+:root {
+  /* ---- ألوان ---- */
+  --c-primary: #0d6e4f;
+  --c-primary-dark: #08492f;
+  --c-primary-light: #e4f2ec;
+  --c-gold: #b8862c;
+  --c-gold-light: #f4e6c6;
+  --c-ink: #21301f;
+  --c-paper: #f9f5e9;
+  --c-paper-alt: #efe6cc;
+  --c-terracotta: #a5432c;
+  --c-terracotta-light: #f7e3db;
+  --c-border: rgba(13, 110, 79, 0.16);
+  --shadow-card: 0 3px 14px rgba(33, 48, 31, 0.09);
+
+  /* ---- طباعة ---- */
+  --font-display: "Amiri", "Traditional Arabic", serif;
+  --font-body: "Tajawal", "Segoe UI", Tahoma, sans-serif;
+
+  /* ---- قياسات ---- */
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --space-1: 6px;
+  --space-2: 12px;
+  --space-3: 18px;
+  --space-4: 28px;
+}
+
+/* نجمة ثمانية (خاتم) — العنصر البصري المميز للتطبيق، تُستخدم
+   كخلفية زخرفية خفيفة وكفاصل صغير قبل عناوين الأقسام */
+@property --star-noop { syntax: '<number>'; inherits: false; initial-value: 0; }
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  direction: rtl;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- الترويسة ---------- */
+
+header {
+  position: relative;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(184, 134, 44, 0.18), transparent 45%),
+    linear-gradient(160deg, var(--c-primary) 0%, var(--c-primary-dark) 100%);
+  color: var(--c-paper);
+  text-align: center;
+  overflow: hidden;
+}
+
+header::before {
+  /* نمط زخرفي هندسي خافت مكرر (نجمات ثمانية) */
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23F4E6C6' stroke-width='1'%3E%3Cpath d='M30 4 L36 20 L52 14 L40 26 L56 30 L40 34 L52 46 L36 40 L30 56 L24 40 L8 46 L20 34 L4 30 L20 26 L8 14 L24 20 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+header h1 {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  letter-spacing: 0.5px;
+}
+
+header p#todayDate {
+  position: relative;
+  margin: var(--space-1) 0 0;
+  font-size: 0.9rem;
+  color: var(--c-gold-light);
+  opacity: 0.95;
+}
+
+/* ---------- شريط التبويبات ---------- */
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2);
+  background: var(--c-paper);
+  border-bottom: 1px solid var(--c-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+nav::-webkit-scrollbar {
+  display: none;
+}
+
+nav button {
+  flex: 0 0 auto;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--c-primary-dark);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+nav button:hover {
+  border-color: var(--c-primary);
+}
+
+nav button:active {
+  transform: scale(0.97);
+}
+
+nav button.active {
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--c-primary-light);
+}
+
+nav button:focus-visible,
+button:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--c-gold);
+  outline-offset: 2px;
+}
+
+/* ---------- المحتوى الرئيسي ---------- */
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-2) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-card);
+}
+
+.card h2 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--c-primary-dark);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* فاصل زخرفي صغير (نجمة ثمانية) قبل كل عنوان قسم — التوقيع البصري */
+.card h2::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  background-color: var(--c-gold);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0 L14.5 8 L22 6 L16.5 12 L22 18 L14.5 16 L12 24 L9.5 16 L2 18 L7.5 12 L2 6 L9.5 8 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0 L14.5 8 L22 6 L16.5 12 L22 18 L14.5 16 L12 24 L9.5 16 L2 18 L7.5 12 L2 6 L9.5 8 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ---------- خطة اليوم ---------- */
+
+#dailyPlan p {
+  margin: 0 0 var(--space-1);
+}
+
+#dailyPlan .plan-list {
+  margin: var(--space-1) 0;
+  padding-inline-start: var(--space-3);
+}
+
+#dailyPlan .plan-list li {
+  margin-bottom: 4px;
+}
+
+.muted {
+  color: #6b7568;
+  font-size: 0.9rem;
+}
+
+.alert {
+  border-radius: 12px;
+  padding: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: 0.92rem;
+}
+
+.alert-warn {
+  background: var(--c-gold-light);
+  color: #6b4e12;
+  border: 1px solid rgba(184, 134, 44, 0.35);
+}
+
+.alert-loose {
+  background: var(--c-terracotta-light);
+  color: var(--c-terracotta);
+  border: 1px solid rgba(165, 67, 44, 0.3);
+}
+
+/* ---------- نموذج الحفظ الجديد ---------- */
+
+label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: var(--c-primary-dark);
+  margin: var(--space-2) 0 4px;
+}
+
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--c-border);
+  background: var(--c-paper-alt);
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  appearance: none;
+}
+
+/* ---------- الأزرار العامة ---------- */
+
+button {
+  font-family: var(--font-body);
+}
+
+#startMemorize,
+.small-btn {
+  margin-top: var(--space-2);
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--c-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.98rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+#startMemorize:hover,
+.small-btn:hover {
+  background: var(--c-primary-dark);
+}
+
+#startMemorize:active,
+.small-btn:active {
+  transform: scale(0.98);
+}
+
+.small-btn {
+  width: auto;
+  margin-top: 0;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+
+/* ---------- عداد التكرار ---------- */
+
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+.counter button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--c-primary);
+  background: #fff;
+  color: var(--c-primary);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.counter button:hover {
+  background: var(--c-primary);
+  color: #fff;
+}
+
+.counter button:active {
+  transform: scale(0.92);
+}
+
+.counter span {
+  min-width: 3ch;
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-primary-dark);
+}
+
+progress {
+  width: 100%;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: none;
+  appearance: none;
+}
+
+progress::-webkit-progress-bar {
+  background: var(--c-paper-alt);
+  border-radius: var(--radius-pill);
+}
+
+progress::-webkit-progress-value {
+  background: linear-gradient(90deg, var(--c-primary), var(--c-gold));
+  border-radius: var(--radius-pill);
+  transition: width 0.25s ease;
+}
+
+progress::-moz-progress-bar {
+  background: linear-gradient(90deg, var(--c-primary), var(--c-gold));
+  border-radius: var(--radius-pill);
+}
+
+/* ---------- التسجيل الصوتي ---------- */
+
+#recordCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+#recordCard > h2 {
+  margin-bottom: 0;
+}
+
+#recordBtn,
+#stopBtn {
+  display: inline-block;
+  width: auto;
+  margin-inline-end: var(--space-2);
+  margin-top: var(--space-2);
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+#recordBtn {
+  background: var(--c-terracotta-light);
+  color: var(--c-terracotta);
+}
+
+#recordBtn.recording {
+  background: var(--c-terracotta);
+  color: #fff;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+#stopBtn {
+  background: var(--c-paper-alt);
+  color: var(--c-ink);
+}
+
+#recordBtn:active,
+#stopBtn:active {
+  transform: scale(0.96);
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(165, 67, 44, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(165, 67, 44, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #recordBtn.recording {
+    animation: none;
+  }
+}
+
+audio {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+/* ---------- نماذج الإضافة داخل المراجعة/التثبيت ---------- */
+
+.inline-form {
+  padding: var(--space-2);
+  margin-bottom: var(--space-3);
+  background: var(--c-paper-alt);
+  border: 1px dashed var(--c-border);
+  border-radius: 14px;
+}
+
+.inline-form label {
+  margin-top: var(--space-1);
+}
+
+.inline-form .small-btn {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.small-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #5c6b57;
+}
+
+/* ---------- قوائم المراجعة / المتفلت ---------- */
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  margin-bottom: var(--space-1);
+  background: var(--c-paper-alt);
+  flex-wrap: wrap;
+}
+
+.item-actions {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.confirm-btn {
+  background: var(--c-gold) !important;
+  color: #3a2a05 !important;
+}
+
+.confirm-btn:hover {
+  background: #a37723 !important;
+}
+
+.list-item.due {
+  border-color: var(--c-gold);
+  background: var(--c-gold-light);
+}
+
+.list-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--c-ink);
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--c-primary-light);
+  color: var(--c-primary-dark);
+}
+
+.tag-loose {
+  background: var(--c-terracotta-light);
+  color: var(--c-terracotta);
+}
+
+/* ---------- الإحصائيات ---------- */
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.stats > div {
+  text-align: center;
+  padding: var(--space-3) var(--space-1);
+  background: var(--c-paper-alt);
+  border-radius: 14px;
+}
+
+.stats span {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: var(--c-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.stats p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--c-ink);
+}
+
+/* ---------- تذييل ---------- */
+
+footer {
+  text-align: center;
+  padding: var(--space-3);
+  font-size: 0.8rem;
+  color: #8a9385;
+}
+
+/* ---------- شاشات أكبر ---------- */
+
+@media (min-width: 720px) {
+  main {
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
