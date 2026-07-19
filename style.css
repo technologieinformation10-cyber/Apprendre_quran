@@ -370,6 +370,20 @@ progress::-moz-progress-bar {
 
 /* ---------- التسجيل الصوتي ---------- */
 
+.counter-phase {
+  display: block;
+  width: fit-content;
+  text-align: center;
+  margin: 0 auto var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b4e12;
+  background: var(--c-gold-light);
+  border: 1px solid rgba(184, 134, 44, 0.35);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+}
+
 #recordCard {
   display: flex;
   flex-direction: column;
@@ -381,7 +395,8 @@ progress::-moz-progress-bar {
 }
 
 #recordBtn,
-#stopBtn {
+#stopBtn,
+#clearRecordingBtn {
   display: inline-block;
   width: auto;
   margin-inline-end: var(--space-2);
@@ -410,8 +425,19 @@ progress::-moz-progress-bar {
   color: var(--c-ink);
 }
 
+#clearRecordingBtn {
+  background: transparent;
+  color: var(--c-terracotta);
+  border: 1px solid var(--c-terracotta);
+}
+
+#clearRecordingBtn:hover {
+  background: var(--c-terracotta-light);
+}
+
 #recordBtn:active,
-#stopBtn:active {
+#stopBtn:active,
+#clearRecordingBtn:active {
   transform: scale(0.96);
 }
 

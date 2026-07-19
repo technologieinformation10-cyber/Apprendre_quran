@@ -137,7 +137,8 @@
   };
 
   // أهداف عدد التكرار في كل مرحلة تثبيت (حسب المنهج المطلوب)
-  const DAY1_TARGET = 25;
+  const DAY1_TARGET = 25; // اليوم الأول للحفظ الجديد
+  const DAY1_RESTABILIZE_TARGET = 20; // اليوم الأول لإعادة تثبيت متفلت: 10 نظراً + 10 غيباً
   const DAILY_TARGET = 5; // بقية الأسبوع الأول
   const WEEK_TARGET = 5; // الأسبوع الثاني والثالث
 
@@ -218,17 +219,11 @@
     const today = todayISO();
     const surahName = surahIndex != null ? SURAHS[surahIndex] : null;
 
-    let initialStage = "day1";
-    let createdDate = today;
-    if (directToReview) {
-      initialStage = "monthly";
-    } else if (restabilize) {
-      // محفوظ سابق يحتاج تعزيزاً فقط، لا حفظاً من الصفر:
-      // نتجاوز مرحلة اليوم الأول (٢٥ تكراراً) وندخله مباشرة
-      // في جدول الأسبوع الأول لإعادة التثبيت.
-      createdDate = addDaysISO(today, -1);
-      initialStage = "week1";
-    }
+    // محفوظ سابق تفلّت (يُدار عبر التثبيت) يمر بنفس نظام التثبيت
+    // تماماً، بما في ذلك اليوم الأول — لكن بهدف أخف لأنه ليس حفظاً
+    // من الصفر: 10 مرات نظراً في المصحف + 10 مرات غيباً (٢٠ إجمالاً)
+    // بدل الـ٢٥ المخصصة للحفظ الجديد. بعدها 5 مرات يومياً بقية الأسبوع.
+    const initialStage = directToReview ? "monthly" : "day1";
 
     const unit = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -236,7 +231,7 @@
       surahIndex,
       surahName,
       number,
-      createdDate,
+      createdDate: today,
       stage: initialStage,
       lastDoneDate: directToReview ? today : null,
       doneCountToday: 0,
@@ -276,9 +271,9 @@
     }
   }
 
-  function targetForStage(stage) {
+  function targetForStage(stage, unit) {
     switch (stage) {
-      case "day1": return DAY1_TARGET;
+      case "day1": return unit && unit.restabilize ? DAY1_RESTABILIZE_TARGET : DAY1_TARGET;
       case "week1": return DAILY_TARGET;
       case "week2":
       case "week3": return WEEK_TARGET;
@@ -286,6 +281,15 @@
       case "loose": return DAILY_TARGET + 5;
       default: return DAILY_TARGET;
     }
+  }
+
+  // مرحلة اليوم الأول لإعادة التثبيت: هل ما زلنا في شطر "نظراً" أم "غيباً"؟
+  function day1PhaseInfo(unit) {
+    const half = DAY1_RESTABILIZE_TARGET / 2; // 10
+    if (unit.doneCountToday < half) {
+      return { label: "نظراً في المصحف", done: unit.doneCountToday, target: half };
+    }
+    return { label: "غيباً", done: unit.doneCountToday - half, target: half };
   }
 
   function occurrencesNeeded(stage) {
@@ -587,18 +591,30 @@
     const unit = getActiveUnit();
     const counterEl = document.getElementById("repeatCounter");
     const progressEl = document.getElementById("repeatProgress");
+    const phaseEl = document.getElementById("counterPhase");
 
     if (!unit) {
-      counterEl.textContent = "٠";
+      counterEl.textContent = "0";
       progressEl.max = DAY1_TARGET;
       progressEl.value = 0;
+      phaseEl.textContent = "";
+      phaseEl.hidden = true;
       return;
     }
 
-    const target = targetForStage(unit.stage);
+    const target = targetForStage(unit.stage, unit);
     progressEl.max = target;
     progressEl.value = unit.doneCountToday;
     counterEl.textContent = toArabicDigits(unit.doneCountToday);
+
+    if (unit.restabilize && unit.stage === "day1") {
+      const phase = day1PhaseInfo(unit);
+      phaseEl.textContent = `المرحلة الحالية: ${phase.label} (${toArabicDigits(phase.done)} / ${toArabicDigits(phase.target)})`;
+      phaseEl.hidden = false;
+    } else {
+      phaseEl.textContent = "";
+      phaseEl.hidden = true;
+    }
   }
 
   function changeCounter(delta) {
@@ -607,7 +623,7 @@
       alert("اختر وحدة حفظ من «الحفظ الجديد» أو «المراجعة» أو «التثبيت» أولاً.");
       return;
     }
-    const target = targetForStage(unit.stage);
+    const target = targetForStage(unit.stage, unit);
     unit.doneCountToday = Math.max(0, Math.min(target, unit.doneCountToday + delta));
     saveState();
     setupCounterForActiveUnit();
@@ -730,9 +746,12 @@
       btn.addEventListener("click", () => {
         const unit = state.units.find((u) => u.id === btn.getAttribute("data-select"));
         if (unit) {
-          // إخراجها من "متفلت" وإدخالها رسمياً في جدول إعادة التثبيت
-          unit.createdDate = addDaysISO(todayISO(), -1);
-          unit.stage = "week1";
+          // إخراجها من "متفلت" وإدخالها رسمياً في خطة التثبيت،
+          // بدءاً من اليوم الأول: 10 مرات نظراً + 10 مرات غيباً،
+          // ثم 5 مرات يومياً بقية الأسبوع (نفس نظام التثبيت تماماً).
+          unit.createdDate = todayISO();
+          unit.stage = "day1";
+          unit.doneCountToday = 0;
           unit.weekOccurrences = 0;
           unit.restabilize = true;
           unit.confirmedMastery = false;
@@ -762,6 +781,7 @@
   let mediaRecorder = null;
   let recordedChunks = [];
   let mediaStream = null;
+  let currentRecordingUrl = null;
 
   async function startRecording() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -777,11 +797,13 @@
       };
       mediaRecorder.onstop = () => {
         const blob = new Blob(recordedChunks, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
+        if (currentRecordingUrl) URL.revokeObjectURL(currentRecordingUrl);
+        currentRecordingUrl = URL.createObjectURL(blob);
         const player = document.getElementById("player");
-        player.src = url;
+        player.src = currentRecordingUrl;
         mediaStream.getTracks().forEach((t) => t.stop());
         document.getElementById("recordBtn").classList.remove("recording");
+        document.getElementById("clearRecordingBtn").hidden = false;
       };
       mediaRecorder.start();
       document.getElementById("recordBtn").classList.add("recording");
@@ -795,6 +817,17 @@
     if (mediaRecorder && mediaRecorder.state !== "inactive") {
       mediaRecorder.stop();
     }
+  }
+
+  function clearRecording() {
+    const player = document.getElementById("player");
+    if (currentRecordingUrl) {
+      URL.revokeObjectURL(currentRecordingUrl);
+      currentRecordingUrl = null;
+    }
+    player.removeAttribute("src");
+    player.load();
+    document.getElementById("clearRecordingBtn").hidden = true;
   }
 
   /* ---------- التبويبات ---------- */
@@ -867,6 +900,7 @@
 
     document.getElementById("recordBtn").addEventListener("click", startRecording);
     document.getElementById("stopBtn").addEventListener("click", stopRecording);
+    document.getElementById("clearRecordingBtn").addEventListener("click", clearRecording);
   }
 
   /* ---------- تسجيل عامل الخدمة (اختياري لاحقاً) ---------- */

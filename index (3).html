@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مساعد حفظ القرآن</title>
+<meta name="theme-color" content="#0d6e4f">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="assets/icons/icon-192.png">
+</head>
+<body>
+<header>
+<h1>📖 مساعد حفظ القرآن</h1>
+<p id="todayDate"></p>
+</header>
+<nav>
+<button id="newBtn">الحفظ الجديد</button>
+<button id="reviewBtn">المراجعة</button>
+<button id="stabilizeBtn">التثبيت</button>
+<button id="looseBtn">المتفلت</button>
+<button id="statsBtn">الإحصائيات</button>
+</nav>
+<main>
+
+<section class="card" id="dailyPlanCard">
+<h2>خطة اليوم</h2>
+<div id="dailyPlan">
+لا توجد خطة اليوم
+</div>
+</section>
+
+<section class="card" id="newMemorizeCard">
+<h2>الحفظ الجديد</h2>
+
+<label for="unitType">نوع الوحدة</label>
+<select id="unitType">
+<option value="page" selected>صفحة</option>
+<option value="halfPage">نصف صفحة</option>
+<option value="thumn">ثمن</option>
+<option value="quarter">ربع</option>
+<option value="surah">سورة كاملة</option>
+</select>
+
+<label for="surah">السورة</label>
+<select id="surah"></select>
+
+<div id="subUnitWrap">
+<label id="subUnitLabel" for="thumn">الصفحة</label>
+<select id="thumn"></select>
+</div>
+
+<button id="startMemorize">
+ابدأ الحفظ
+</button>
+</section>
+
+<section class="card" id="counterCard">
+<h2>التكرار</h2>
+<p id="counterPhase" class="counter-phase" hidden></p>
+<div class="counter">
+<button class="minus">-</button>
+<span id="repeatCounter">0</span>
+<button class="plus">+</button>
+</div>
+<progress id="repeatProgress" value="0" max="25"></progress>
+</section>
+
+<section class="card" id="recordCard">
+<h2>التسجيل</h2>
+<button id="recordBtn">
+🎤 تسجيل
+</button>
+<button id="stopBtn">
+⏹ إيقاف
+</button>
+<button id="clearRecordingBtn" hidden>
+🗑 مسح التسجيل
+</button>
+<audio id="player" controls></audio>
+</section>
+
+<section class="card" id="reviewCard">
+<h2 id="reviewSectionTitle">المراجعة</h2>
+
+<div id="reviewAddForm" class="inline-form">
+<p class="small-note">أضف محفوظاً تتقنه جيداً مباشرة إلى المراجعة، دون حاجة لخطة تثبيت</p>
+<label for="reviewUnitType">نوع الوحدة</label>
+<select id="reviewUnitType">
+<option value="surah">سورة</option>
+<option value="hizb">حزب</option>
+<option value="juz">جزء</option>
+</select>
+<label for="reviewUnitNumber">الاختيار</label>
+<select id="reviewUnitNumber"></select>
+<button id="addToReview" class="small-btn">أضف إلى المراجعة</button>
+</div>
+
+<div id="stabilizeAddForm" class="inline-form" hidden>
+<p class="small-note">أضف سورة أو حزباً أو جزءاً حفظته سابقاً وتفلّت، لوضع خطة تثبيت له</p>
+<label for="stabilizeUnitType">نوع الوحدة</label>
+<select id="stabilizeUnitType">
+<option value="surah">سورة</option>
+<option value="hizb">حزب</option>
+<option value="juz">جزء</option>
+</select>
+<label for="stabilizeUnitNumber">الاختيار</label>
+<select id="stabilizeUnitNumber"></select>
+<button id="addToStabilize" class="small-btn">ضع خطة تثبيت</button>
+</div>
+
+<div id="reviewList"></div>
+</section>
+
+<section class="card" id="looseCard">
+<h2>المحفوظ المتفلت</h2>
+<div id="looseList"></div>
+</section>
+
+<section class="card" id="statsCard">
+<h2>الإحصائيات</h2>
+<div class="stats">
+<div>
+<span id="savedPages">0</span>
+<p>الصفحات</p>
+</div>
+<div>
+<span id="savedAthman">0</span>
+<p>الأثمان</p>
+</div>
+<div>
+<span id="completedReview">0</span>
+<p>المراجعات</p>
+</div>
+<div>
+<span id="successRate">0%</span>
+<p>الإتقان</p>
+</div>
+</div>
+</section>
+
+</main>
+<footer>
+نسخة أولية © 2026
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
